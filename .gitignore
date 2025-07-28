@@ -1,0 +1,18 @@
+# 入力ファイル（動画ファイル）
+input/*
+!input/.gitkeep
+
+# 出力ファイル（変換済みファイル）
+output/*
+!output/.gitkeep
+
+# システムファイル
+.DS_Store
+Thumbs.db
+
+# ログファイル
+*.log
+
+# 一時ファイル
+*.tmp
+*.temp

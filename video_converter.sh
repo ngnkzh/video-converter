@@ -55,23 +55,20 @@ process_folder() {
         echo "出力ディレクトリを作成しました: $output_dir"
     fi
     
-    # 対応する動画ファイル拡張子
-    local video_extensions="mp4 mov avi mkv flv webm"
-    local file_count=0
-    local processed_count=0
+    # 動画ファイルを一括取得
+    local files=("$input_dir"/*.{mp4,mov,avi,mkv,flv,webm,MP4,MOV,AVI,MKV,FLV,WEBM})
+    local video_files=()
     
-    # ファイル数をカウント
-    for ext in $video_extensions; do
-        for file in "$input_dir"/*.$ext "$input_dir"/*.$( echo $ext | tr '[:lower:]' '[:upper:]'); do
-            if [ -f "$file" ]; then
-                ((file_count++))
-            fi
-        done
+    # 存在するファイルのみを配列に格納
+    for file in "${files[@]}"; do
+        [ -f "$file" ] && video_files+=("$file")
     done
+    
+    local file_count=${#video_files[@]}
     
     if [ $file_count -eq 0 ]; then
         echo "エラー: 対応する動画ファイルが見つかりませんでした"
-        echo "対応形式: $video_extensions"
+        echo "対応形式: mp4 mov avi mkv flv webm"
         return 1
     fi
     
@@ -80,23 +77,19 @@ process_folder() {
     echo ""
     
     # 各動画ファイルを処理
-    for ext in $video_extensions; do
-        for file in "$input_dir"/*.$ext "$input_dir"/*.$( echo $ext | tr '[:lower:]' '[:upper:]'); do
-            if [ -f "$file" ]; then
-                ((processed_count++))
-                echo "[$processed_count/$file_count]"
-                
-                if [ "$conversion_type" = "1" ]; then
-                    compress_video "$file" "$output_dir"
-                elif [ "$conversion_type" = "2" ]; then
-                    convert_to_gif "$file" "$output_dir"
-                fi
-                echo ""
-            fi
-        done
+    for i in "${!video_files[@]}"; do
+        local file="${video_files[$i]}"
+        echo "$((i+1))/$file_count"
+        
+        if [ "$conversion_type" = "1" ]; then
+            compress_video "$file" "$output_dir"
+        elif [ "$conversion_type" = "2" ]; then
+            convert_to_gif "$file" "$output_dir"
+        fi
+        echo ""
     done
     
-    echo "処理完了: $processed_count 個のファイルを処理しました"
+    echo "処理完了: $file_count 個のファイルを処理しました"
 }
 
 # メイン処理
@@ -128,10 +121,16 @@ while true; do
     case $choice in
         1)
             process_folder "$input_dir" "$output_dir" "1"
+            echo ""
+            echo "処理が完了しました。Enterキーを押して終了してください。"
+            read
             break
             ;;
         2)
             process_folder "$input_dir" "$output_dir" "2"
+            echo ""
+            echo "処理が完了しました。Enterキーを押して終了してください。"
+            read
             break
             ;;
         3)

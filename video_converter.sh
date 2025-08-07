@@ -56,13 +56,17 @@ process_folder() {
     fi
     
     # 動画ファイルを一括取得
-    local files=("$input_dir"/*.{mp4,mov,avi,mkv,flv,webm,MP4,MOV,AVI,MKV,FLV,WEBM})
+    shopt -s nullglob nocaseglob
     local video_files=()
     
-    # 存在するファイルのみを配列に格納
-    for file in "${files[@]}"; do
-        [ -f "$file" ] && video_files+=("$file")
+    # 各拡張子で個別にファイルを検索
+    for ext in mp4 mov avi mkv flv webm; do
+        for file in "$input_dir"/*.$ext; do
+            [ -f "$file" ] && video_files+=("$file")
+        done
     done
+    
+    shopt -u nullglob nocaseglob
     
     local file_count=${#video_files[@]}
     
